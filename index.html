@@ -61,23 +61,23 @@
     <script>
         const priceData = {
             "国産時計": {
-                "SEIKO（一般）": { quartz3: 8800, quartzChrono: 13200, mechanical3: 19800, mechanicalChrono: 24200 },
-                "SEIKO（DOLCE系）": { quartz3: 8800, quartzChrono: 13200, mechanical3: 19800, mechanicalChrono: 24200 },
-                "SEIKO（GS・CREDOR）": { quartz3: 19800, quartzChrono: 24200, mechanical3: 38500, mechanicalChrono: 44000 },
-                "CITIZEN": { quartz3: 8800, quartzChrono: 13200, mechanical3: 19800, mechanicalChrono: 24200 },
-                "CASIO": { quartz3: 8800, quartzChrono: 13200, mechanical3: 19800, mechanicalChrono: 24200 },
-                "ORIENT": { quartz3: 8800, quartzChrono: 13200, mechanical3: 19800, mechanicalChrono: 24200 },
-                "その他国産": { quartz3: 8800, quartzChrono: 13200, mechanical3: 19800, mechanicalChrono: 24200 }
+                "SEIKO（一般）": { quartz3: 11000, quartzChrono: 15400, mechanical3: 15400, mechanicalChrono: 17600 },
+                "SEIKO（DOLCE系）": { quartz3: 11000, quartzChrono: 15400, mechanical3: 15400, mechanicalChrono: 17600 },
+                "SEIKO（GS・CREDOR）": { quartz3: 33000, quartzChrono: 38500, mechanical3: 44000, mechanicalChrono: 48400 },
+                "CITIZEN": { quartz3: 11000, quartzChrono: 15400, mechanical3: 15400, mechanicalChrono: 17600 },
+                "CASIO": { quartz3: 11000, quartzChrono: 15400, mechanical3: 15400, mechanicalChrono: 17600 },
+                "ORIENT": { quartz3: 11000, quartzChrono: 15400, mechanical3: 15400, mechanicalChrono: 17600 },
+                "その他国産": { quartz3: 11000, quartzChrono: 15400, mechanical3: 15400, mechanicalChrono: 17600 }
             },
             "舶来時計": {
-                "グループA（CYMA、ETERNA、ENICAR、FENDI、NINARICCI等）": { quartz3: 27500, quartzChrono: 33000, mechanical3: 44000, mechanicalChrono: 49500 },
+                "グループA（CYMA、ETERNA、ENICAR、FENDI、NINARICCI等）": { quartz3: 27500, quartzChrono: 33000, mechanical3: 36300, mechanicalChrono: 44000 },
                 "グループB（DIOR、DUNHILL、GUCCI、HAMILTON、HUNTING WORLD、LONGINES等）": { quartz3: 30800, quartzChrono: 38500, mechanical3: 49500, mechanicalChrono: 55000 },
                 "グループC（CHANEL、EBEL、HERMES、JUVENIA等）": { quartz3: 33000, quartzChrono: 38500, mechanical3: 55000, mechanicalChrono: 66000 },
                 "グループD（BREITLING、BAUME & MERCIER、CARTIER、CORUM、FRANK MULLER等）": { quartz3: 38500, quartzChrono: 44000, mechanical3: 66000, mechanicalChrono: 77000 },
                 "グループE（AUDEMARS PIGUET、CHOPARD、PATEK PHILIPPE等）": { quartz3: 66000, quartzChrono: 77000, mechanical3: 110000, mechanicalChrono: 132000 }
             },
             "OMEGA・TAG HEUER": {
-                "OMEGA": { quartz3: 38500, quartzChrono: 44000, mechanical3: 66000, mechanicalChrono: 77000 },
+                "OMEGA": { quartz3: 33000, quartzChrono: 38500, mechanical3: 49500, mechanicalChrono: 55000 },
                 "TAG HEUER": { quartz3: 38500, quartzChrono: 44000, mechanical3: 66000, mechanicalChrono: 77000 }
             },
             "ROLEX": {
@@ -281,7 +281,7 @@
                     <p><strong>機構：</strong>${mechanism}</p>
                     
                     <h3>料金詳細</h3>
-                    <p><strong>基本料金：</strong>¥${basePrice.toLocaleString()}</p>
+                    <p><strong>基本料金：</strong>¥${basePrice.toLocaleString()}〜</p>
             `;
 
             if (additionalItems.length > 0) {
@@ -294,7 +294,7 @@
 
             resultHTML += `
                     <div class="price-display">
-                        <strong>合計金額：¥${totalPrice.toLocaleString()}</strong>
+                        <strong>合計金額：¥${totalPrice.toLocaleString()}〜</strong>
                     </div>
             `;
 
@@ -302,7 +302,7 @@
             if (shouldShowPolish()) {
                 resultHTML += `
                     <div class="polish-note">
-                        <p>参考：磨きセット価格（修理料金＋磨き）＝¥${totalPrice.toLocaleString()}</p>
+                        <p>参考：磨きセット価格（修理料金＋磨き）＝¥${totalPrice.toLocaleString()}〜</p>
                         ${polishPrice > 0 ? '<p>※磨きの対応可否や詳細は修理業者判断の場合があります。</p>' : ''}
                     </div>
                 `;
