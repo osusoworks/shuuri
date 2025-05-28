@@ -1,0 +1,246 @@
+# Webアプリの基本構造を作成します。料金表に完全準拠した選択式フローと料金計算機能を実装します。
+# HTML, CSS, JavaScriptを単一ファイルにまとめ、iPadとPC両対応のレスポンシブデザインにします。
+
+web_app_code = '''
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>修理料金案内アシスト</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+  h1 { text-align: center; }
+  button { font-size: 1.2em; padding: 10px 20px; margin: 5px 0; width: 100%; }
+  .hidden { display: none; }
+  .step { margin-bottom: 20px; }
+  .progress { margin-bottom: 20px; }
+  .result { font-weight: bold; font-size: 1.3em; margin-top: 20px; }
+</style>
+</head>
+<body>
+<h1>修理料金案内アシスト</h1>
+<div id="app">
+  <div class="progress">ステップ <span id="stepNum">1</span>/5</div>
+
+  <div id="step1" class="step">
+    <p>大分類を選択してください</p>
+    <button onclick="selectCategory('国産時計')">国産時計</button>
+    <button onclick="selectCategory('舶来時計')">舶来時計</button>
+    <button onclick="selectCategory('OMEGA・TAG HEUER')">OMEGA・TAG HEUER</button>
+    <button onclick="selectCategory('ROLEX')">ROLEX</button>
+  </div>
+
+  <div id="step2" class="step hidden">
+    <p id="step2Title">ブランド・価格帯を選択してください</p>
+    <div id="step2Options"></div>
+  </div>
+
+  <div id="step3" class="step hidden">
+    <p>機構を選択してください</p>
+    <button onclick="selectMechanism('クォーツ 3針')">クォーツ 3針</button>
+    <button onclick="selectMechanism('クォーツ クロノグラフ')">クォーツ クロノグラフ</button>
+    <button onclick="selectMechanism('メカニカル 3針')">メカニカル 3針</button>
+    <button onclick="selectMechanism('メカニカル クロノグラフ')">メカニカル クロノグラフ</button>
+  </div>
+
+  <div id="step4" class="step hidden">
+    <p>特殊仕様を選択してください（該当する場合のみ）</p>
+    <label><input type="checkbox" id="seethrough" /> シースルーバック（+2,200円）</label><br />
+    <label id="coaxialLabel" class="hidden"><input type="checkbox" id="coaxial" /> OMEGA コーアクシャル（+11,000円）</label>
+  </div>
+
+  <div id="step5" class="step hidden">
+    <p>磨きオプションを選択してください</p>
+    <label><input type="checkbox" id="lightPolish3" /> ライトポリッシュ（3連：6,600円）</label><br />
+    <label><input type="checkbox" id="lightPolish5" /> ライトポリッシュ（5連：8,800円）</label><br />
+    <label><input type="checkbox" id="newFinish3" /> 新品仕上げ（3連：11,000円）</label><br />
+    <label><input type="checkbox" id="newFinish5" /> 新品仕上げ（5連：13,200円）</label><br />
+    <p>※ROLEX磨きは別料金（要相談）</p>
+  </div>
+
+  <button id="prevBtn" class="hidden" onclick="prevStep()">戻る</button>
+  <button id="nextBtn" onclick="nextStep()">次へ</button>
+
+  <div id="result" class="result hidden"></div>
+  <button id="resetBtn" class="hidden" onclick="resetApp()">リセット</button>
+</div>
+
+<script>
+const priceData = {
+  '国産時計': {
+    'SEIKO（一般）': { 'クォーツ 3針': 27500, 'クォーツ クロノグラフ': 33000, 'メカニカル 3針': 38500, 'メカニカル クロノグラフ': 44000 },
+    'SEIKO（DOLCE系）': { 'クォーツ 3針': 30800, 'クォーツ クロノグラフ': 36300, 'メカニカル 3針': 41800, 'メカニカル クロノグラフ': 47300 },
+    'SEIKO（GS・CREDOR）': { 'クォーツ 3針': 38500, 'クォーツ クロノグラフ': 44000, 'メカニカル 3針': 49500, 'メカニカル クロノグラフ': 55000 },
+    'CITIZEN': { 'クォーツ 3針': 27500, 'クォーツ クロノグラフ': 33000, 'メカニカル 3針': 38500, 'メカニカル クロノグラフ': 44000 },
+    'CASIO': { 'クォーツ 3針': 22000, 'クォーツ クロノグラフ': 27500, 'メカニカル 3針': 33000, 'メカニカル クロノグラフ': 38500 },
+    'ORIENT': { 'クォーツ 3針': 27500, 'クォーツ クロノグラフ': 33000, 'メカニカル 3針': 38500, 'メカニカル クロノグラフ': 44000 },
+    'その他国産': { 'クォーツ 3針': 22000, 'クォーツ クロノグラフ': 27500, 'メカニカル 3針': 33000, 'メカニカル クロノグラフ': 38500 }
+  },
+  '舶来時計': {
+    '27,500円〜（CYMA、ETERNA、ENICAR、FENDI、NINARICCI、その他）': { 'クォーツ 3針': 27500, 'クォーツ クロノグラフ': 33000, 'メカニカル 3針': 38500, 'メカニカル クロノグラフ': 44000 },
+    '30,800円〜（DIOR、DUNHILL、GUCCI、HAMILTON、HUNTING WORLD、LONGINES、その他）': { 'クォーツ 3針': 30800, 'クォーツ クロノグラフ': 36300, 'メカニカル 3針': 41800, 'メカニカル クロノグラフ': 47300 },
+    '33,000円〜（CHANEL、EBEL、HERMES、JUVENIA、その他）': { 'クォーツ 3針': 33000, 'クォーツ クロノグラフ': 38500, 'メカニカル 3針': 44000, 'メカニカル クロノグラフ': 49500 },
+    '38,500円〜（BREITLING、BAUME & MERCIER、CARTIER、CORUM、FRANK MULLER、その他）': { 'クォーツ 3針': 38500, 'クォーツ クロノグラフ': 44000, 'メカニカル 3針': 49500, 'メカニカル クロノグラフ': 55000 },
+    '66,000円〜（AUDEMARS PIGUET、CHOPARD、PATEK PHILIPPE、その他）': { 'クォーツ 3針': 66000, 'クォーツ クロノグラフ': 71500, 'メカニカル 3針': 77000, 'メカニカル クロノグラフ': 82500 }
+  },
+  'OMEGA・TAG HEUER': {
+    'OMEGA・TAG HEUER': { 'クォーツ 3針': 44000, 'クォーツ クロノグラフ': 49500, 'メカニカル 3針': 55000, 'メカニカル クロノグラフ': 60500 }
+  },
+  'ROLEX': {
+    'ROLEX': { 'クォーツ 3針': 66000, 'クォーツ クロノグラフ': 71500, 'メカニカル 3針': 77000, 'メカニカル クロノグラフ': 82500 }
+  }
+};
+
+let currentStep = 1;
+let selectedCategory = null;
+let selectedBrand = null;
+let selectedMechanism = null;
+
+function updateProgress() {
+  document.getElementById('stepNum').textContent = currentStep;
+}
+
+function showStep(step) {
+  for (let i = 1; i <= 5; i++) {
+    document.getElementById('step' + i).classList.add('hidden');
+  }
+  if (step <= 5) {
+    document.getElementById('step' + step).classList.remove('hidden');
+  }
+  document.getElementById('prevBtn').classList.toggle('hidden', step === 1);
+  document.getElementById('nextBtn').classList.toggle('hidden', step === 5);
+  document.getElementById('resetBtn').classList.add('hidden');
+  updateProgress();
+}
+
+function selectCategory(category) {
+  selectedCategory = category;
+  currentStep = 2;
+  updateStep2Options();
+  showStep(currentStep);
+  // OMEGA・TAG HEUER選択時は特殊仕様のコーアクシャル表示を有効にする
+  document.getElementById('coaxialLabel').classList.toggle('hidden', category !== 'OMEGA・TAG HEUER');
+}
+
+function updateStep2Options() {
+  const container = document.getElementById('step2Options');
+  container.innerHTML = '';
+  if (selectedCategory === '国産時計') {
+    const brands = Object.keys(priceData['国産時計']);
+    brands.forEach(brand => {
+      const btn = document.createElement('button');
+      btn.textContent = brand;
+      btn.onclick = () => selectBrand(brand);
+      container.appendChild(btn);
+    });
+  } else if (selectedCategory === '舶来時計') {
+    const brands = Object.keys(priceData['舶来時計']);
+    brands.forEach(brand => {
+      const btn = document.createElement('button');
+      btn.textContent = brand;
+      btn.onclick = () => selectBrand(brand);
+      container.appendChild(btn);
+    });
+  } else {
+    // OMEGA・TAG HEUER, ROLEXは1つの選択肢のみ
+    const btn = document.createElement('button');
+    btn.textContent = selectedCategory;
+    btn.onclick = () => selectBrand(selectedCategory);
+    container.appendChild(btn);
+  }
+}
+
+function selectBrand(brand) {
+  selectedBrand = brand;
+  currentStep = 3;
+  showStep(currentStep);
+}
+
+function selectMechanism(mechanism) {
+  selectedMechanism = mechanism;
+  currentStep = 4;
+  showStep(currentStep);
+}
+
+function nextStep() {
+  if (currentStep === 4) {
+    currentStep = 5;
+    showStep(currentStep);
+  } else if (currentStep === 5) {
+    calculatePrice();
+  }
+}
+
+function prevStep() {
+  if (currentStep === 5) {
+    currentStep = 4;
+  } else if (currentStep === 4) {
+    currentStep = 3;
+  } else if (currentStep === 3) {
+    currentStep = 2;
+  } else if (currentStep === 2) {
+    currentStep = 1;
+  }
+  showStep(currentStep);
+}
+
+function calculatePrice() {
+  let basePrice = priceData[selectedCategory][selectedBrand][selectedMechanism];
+  let addPrice = 0;
+  if (document.getElementById('seethrough').checked) {
+    addPrice += 2200;
+  }
+  if (selectedCategory === 'OMEGA・TAG HEUER' && document.getElementById('coaxial').checked) {
+    addPrice += 11000;
+  }
+  let polishPrice = 0;
+  if (document.getElementById('lightPolish3').checked) polishPrice += 6600;
+  if (document.getElementById('lightPolish5').checked) polishPrice += 8800;
+  if (document.getElementById('newFinish3').checked) polishPrice += 11000;
+  if (document.getElementById('newFinish5').checked) polishPrice += 13200;
+
+  const totalPrice = basePrice + addPrice + polishPrice;
+
+  let warranty = '';
+  if (selectedMechanism.startsWith('メカニカル')) {
+    if (selectedBrand.includes('中級品') || selectedBrand.includes('GS') || selectedBrand.includes('CREDOR')) {
+      warranty = '2年';
+    } else {
+      warranty = '1年';
+    }
+  } else {
+    warranty = '1年';
+  }
+
+  const resultDiv = document.getElementById('result');
+  resultDiv.innerHTML = `基本料金: ${basePrice.toLocaleString()}円<br />加算料金: ${addPrice.toLocaleString()}円<br />磨き料金: ${polishPrice.toLocaleString()}円<br />合計金額: ${totalPrice.toLocaleString()}円<br />保証期間: ${warranty}`;
+  resultDiv.classList.remove('hidden');
+  document.getElementById('nextBtn').classList.add('hidden');
+  document.getElementById('prevBtn').classList.add('hidden');
+  document.getElementById('step1').classList.add('hidden');
+  document.getElementById('step2').classList.add('hidden');
+  document.getElementById('step3').classList.add('hidden');
+  document.getElementById('step4').classList.add('hidden');
+  document.getElementById('step5').classList.add('hidden');
+  document.getElementById('resetBtn').classList.remove('hidden');
+}
+
+function resetApp() {
+  selectedCategory = null;
+  selectedBrand = null;
+  selectedMechanism = null;
+  currentStep = 1;
+  document.getElementById('result').classList.add('hidden');
+  document.getElementById('nextBtn').classList.remove('hidden');
+  document.getElementById('resetBtn').classList.add('hidden');
+  showStep(currentStep);
+}
+
+showStep(currentStep);
+</script>
+</body>
+</html>
+'''
+
+web_app_code
