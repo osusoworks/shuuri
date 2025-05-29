@@ -9,6 +9,8 @@
         body { font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif; line-height: 1.6; background: #f5f5f5; }
         .container { max-width: 800px; margin: 0 auto; padding: 20px; }
         .header { background: #2c3e50; color: white; padding: 20px; text-align: center; border-radius: 10px; margin-bottom: 30px; }
+        .step-trail { background: #eaf6fb; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 16px; color: #34495e; }
+        .step-trail div { margin-bottom: 5px; }
         .step-counter { font-size: 18px; margin-bottom: 10px; color: #7f8c8d; }
         .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .question { font-size: 20px; margin-bottom: 25px; color: #2c3e50; font-weight: bold; }
@@ -38,9 +40,11 @@
             <h1>修理料金案内アシスト</h1>
         </div>
 
+        <div id="step-trail" class="step-trail"></div>
+
         <div id="step-container" class="card">
-            <div class="step-counter" id="step-counter">ステップ 1/5</div>
-            <div class="question" id="question">大分類を選択してください</div>
+            <div class="step-counter" id="step-counter"></div>
+            <div class="question" id="question"></div>
             <div class="options" id="options"></div>
             <div class="navigation">
                 <button class="nav-btn btn-back hidden" id="back-btn" onclick="goBack()">戻る</button>
@@ -62,95 +66,165 @@
         const priceData = {
             "国産時計": {
                 "SEIKO（一般）": { quartz3: 11000, quartzChrono: 15400, mechanical3: 15400, mechanicalChrono: 17600 },
-                "SEIKO（DOLCE系）": { quartz3: 11000, quartzChrono: 15400, mechanical3: 15400, mechanicalChrono: 17600 },
-                "SEIKO（GS・CREDOR）": { quartz3: 33000, quartzChrono: 38500, mechanical3: 44000, mechanicalChrono: 48400 },
-                "CITIZEN": { quartz3: 11000, quartzChrono: 15400, mechanical3: 15400, mechanicalChrono: 17600 },
+                "SEIKO（DOLCE/EXCELINE/LASSALE）": { quartz3: 15400, quartzChrono: 16500, mechanical3: 17600, mechanicalChrono: 19800 },
+                "SEIKO（GS/CREDOR）": { quartz3: 33000, quartzChrono: 38500, mechanical3: 44000, mechanicalChrono: 48400 },
+                "CITIZEN（一般）": { quartz3: 11000, quartzChrono: 15400, mechanical3: 15400, mechanicalChrono: 17600 },
+                "CITIZEN（EXCEED）": { quartz3: 15400, quartzChrono: 16500, mechanical3: 17600, mechanicalChrono: 19800 },
                 "CASIO": { quartz3: 11000, quartzChrono: 15400, mechanical3: 15400, mechanicalChrono: 17600 },
                 "ORIENT": { quartz3: 11000, quartzChrono: 15400, mechanical3: 15400, mechanicalChrono: 17600 },
-                "その他国産": { quartz3: 11000, quartzChrono: 15400, mechanical3: 15400, mechanicalChrono: 17600 }
+                "EPSON": { quartz3: 11000, quartzChrono: 15400, mechanical3: 15400, mechanicalChrono: 17600 }
             },
             "舶来時計": {
-                "グループA（CYMA、ETERNA、ENICAR、FENDI、NINARICCI等）": { quartz3: 27500, quartzChrono: 33000, mechanical3: 36300, mechanicalChrono: 44000 },
-                "グループB（DIOR、DUNHILL、GUCCI、HAMILTON、HUNTING WORLD、LONGINES等）": { quartz3: 30800, quartzChrono: 38500, mechanical3: 49500, mechanicalChrono: 55000 },
-                "グループC（CHANEL、EBEL、HERMES、JUVENIA等）": { quartz3: 33000, quartzChrono: 38500, mechanical3: 55000, mechanicalChrono: 66000 },
-                "グループD（BREITLING、BAUME & MERCIER、CARTIER、CORUM、FRANK MULLER等）": { quartz3: 38500, quartzChrono: 44000, mechanical3: 66000, mechanicalChrono: 77000 },
-                "グループE（AUDEMARS PIGUET、CHOPARD、PATEK PHILIPPE等）": { quartz3: 66000, quartzChrono: 77000, mechanical3: 110000, mechanicalChrono: 132000 }
+                "グループ1（CYMA、ETERNA、ENICAR、FENDI、NINARICCI等）": { quartz3: 27500, quartzChrono: 33000, mechanical3: 36300, mechanicalChrono: 44000 },
+                "グループ2（DIOR、DUNHILL、GUCCI、HAMILTON、LONGINES等）": { quartz3: 30800, quartzChrono: 36300, mechanical3: 39600, mechanicalChrono: 49500 },
+                "グループ3（CHANEL、EBEL、HERMES、JUVENIA等）": { quartz3: 33000, quartzChrono: 58300, mechanical3: 44000, mechanicalChrono: 60500 },
+                "グループ4（BREITLING、BAUME & MERCIER、CARTIER、CORUM、FRANK MULLER等）": { quartz3: 38500, quartzChrono: 60500, mechanical3: 49500, mechanicalChrono: 63800 },
+                "グループ5（AUDEMARS PIGUET、CHOPARD、PATEK PHILIPPE等）": { quartz3: 66000, quartzChrono: 77000, mechanical3: 93500, mechanicalChrono: 132000 }
             },
-            "OMEGA・TAG HEUER": {
-                "OMEGA": { quartz3: 33000, quartzChrono: 38500, mechanical3: 49500, mechanicalChrono: 55000 },
-                "TAG HEUER": { quartz3: 38500, quartzChrono: 44000, mechanical3: 66000, mechanicalChrono: 77000 }
+            "TAG HEUER": {
+                "フォーミュラ1": { quartz3: 27500, quartzChrono: 35200, mechanical3: 38500, mechanicalChrono: 49500 },
+                "LINK/CARRERA/AQUARACER他": { quartz3: 33000, quartzChrono: 52800, mechanical3: 46200, mechanicalChrono: 60500 }
+            },
+            "OMEGA": {
+                "DE VILLE/CONSTELLATION": { quartz3: 33000, quartzChrono: 38500, mechanical3: 49500, mechanicalChrono: 55000 },
+                "SEAMASTER": { quartz3: 38500, quartzChrono: 55000, mechanical3: 60500, mechanicalChrono: 66000 },
+                "SPEEDMASTER": { mechanicalChrono: 66000 }
             },
             "ROLEX": {
-                "ROLEX": { quartz3: 49500, quartzChrono: 55000, mechanical3: 77000, mechanicalChrono: 88000 }
+                "スポーツモデル（デイトナ/エクスプローラー/サブマリーナ/エアキング他）": { mechanical3: 60500, mechanicalChrono: 82500 },
+                "ドレスモデル（デイトジャスト/デイデイト/オイスターパーペチュアル他）": { mechanical3: 55000 }
             }
         };
 
         let currentStep = 1;
         let selections = {};
+        let totalSteps = 0;
 
-        const steps = [
-            {
-                question: "大分類を選択してください",
-                options: ["国産時計", "舶来時計", "OMEGA・TAG HEUER", "ROLEX"],
-                key: "category"
-            },
-            {
-                question: "ブランド・価格帯を選択してください",
+        function getDynamicSteps() {
+            const baseSteps = [
+                {
+                    question: "大分類を選択してください",
+                    options: ["国産時計", "舶来時計", "TAG HEUER", "OMEGA", "ROLEX"],
+                    key: "category"
+                },
+                {
+                    question: "ブランド・グレードを選択してください",
+                    getOptions: () => {
+                        const category = selections.category;
+                        return Object.keys(priceData[category] || {});
+                    },
+                    key: "brand"
+                }
+            ];
+
+            // 機構選択ステップ
+            const mechanismStep = {
+                question: "機構を選択してください",
                 getOptions: () => {
                     const category = selections.category;
-                    return Object.keys(priceData[category] || {});
+                    const brand = selections.brand;
+                    const brandData = priceData[category][brand];
+                    
+                    let options = [];
+                    if (brandData.quartz3) options.push("クォーツ 3針");
+                    if (brandData.quartzChrono) options.push("クォーツ クロノグラフ");
+                    if (brandData.mechanical3) options.push("メカニカル 3針");
+                    if (brandData.mechanicalChrono) options.push("メカニカル クロノグラフ");
+                    
+                    return options;
                 },
-                key: "brand"
-            },
-            {
-                question: "機構を選択してください",
-                options: ["クォーツ 3針", "クォーツ クロノグラフ", "メカニカル 3針", "メカニカル クロノグラフ"],
                 key: "mechanism"
-            },
-            {
+            };
+
+            // 特殊仕様ステップ
+            const specialStep = {
                 question: "特殊仕様を選択してください（該当するものにチェック）",
                 type: "checkbox",
                 options: [
                     { label: "シースルーバック（+2,200円）", value: "seethrough", price: 2200 },
-                    { label: "OMEGA コーアクシャル（+11,000円）", value: "coaxial", price: 11000, condition: () => selections.brand === "OMEGA" }
+                    { 
+                        label: "OMEGA コーアクシャル（+11,000円）", 
+                        value: "coaxial", 
+                        price: 11000, 
+                        condition: () => selections.category === "OMEGA" && selections.brand === "DE VILLE/CONSTELLATION"
+                    }
                 ],
                 key: "special"
-            },
-            {
+            };
+
+            // 磨きステップ
+            const polishStep = {
                 question: "磨きオプションを選択してください（該当するものにチェック）",
                 type: "checkbox",
-                options: [
-                    { label: "ライトポリッシュ（3連：6,600円）", value: "light3", price: 6600 },
-                    { label: "ライトポリッシュ（5連：8,800円）", value: "light5", price: 8800 },
-                    { label: "新品仕上げ（3連：11,000円）", value: "finish3", price: 11000 },
-                    { label: "新品仕上げ（5連：13,200円）", value: "finish5", price: 13200 }
-                ],
+                getOptions: () => {
+                    const isRolex = selections.category === "ROLEX";
+                    const price3 = isRolex ? 17600 : 16500;
+                    const price5 = isRolex ? 19800 : 18700;
+                    
+                    return [
+                        { label: `ライトポリッシュ（3連：${price3.toLocaleString()}円）`, value: "light3", price: price3 },
+                        { label: `ライトポリッシュ（5連：${price5.toLocaleString()}円）`, value: "light5", price: price5 },
+                        { label: `新品仕上げ（3連：${price3.toLocaleString()}円）`, value: "finish3", price: price3 },
+                        { label: `新品仕上げ（5連：${price5.toLocaleString()}円）`, value: "finish5", price: price5 }
+                    ];
+                },
                 key: "polish"
+            };
+
+            let steps = [...baseSteps, mechanismStep, specialStep];
+            
+            // 磨きステップはROLEXとOMEGAのみ
+            if (shouldShowPolish()) {
+                steps.push(polishStep);
             }
-        ];
+            
+            return steps;
+        }
 
         function shouldShowPolish() {
-            return selections.category === "ROLEX" || (selections.category === "OMEGA・TAG HEUER" && selections.brand === "OMEGA");
+            return selections.category === "ROLEX" || selections.category === "OMEGA";
+        }
+
+        function updateStepTrail() {
+            const stepTrail = document.getElementById('step-trail');
+            const labels = ['大分類', 'ブランド・グレード', '機構', '特殊仕様', '磨きオプション'];
+            let trailHtml = '';
+            let count = 1;
+            
+            for (const key of ['category', 'brand', 'mechanism', 'special', 'polish']) {
+                if (selections[key] && (Array.isArray(selections[key]) ? selections[key].length > 0 : true)) {
+                    let val = selections[key];
+                    if (Array.isArray(val)) {
+                        val = val.length > 0 ? val.join(', ') : '';
+                    }
+                    if (val) {
+                        trailHtml += `<div><strong>${count}.</strong> ${labels[count - 1]}：${val}</div>`;
+                        count++;
+                    }
+                }
+            }
+            stepTrail.innerHTML = trailHtml || '<div>選択を開始してください</div>';
         }
 
         function renderStep() {
-            const step = steps[currentStep - 1];
+            const steps = getDynamicSteps();
+            totalSteps = steps.length;
             
-            // ステップ5で磨きオプションが不要な場合は結果表示へ
-            if (currentStep === 5 && !shouldShowPolish()) {
-                selections.polish = []; // 磨きオプションなし
+            if (currentStep > totalSteps) {
                 showResult();
                 return;
             }
-            
-            document.getElementById('step-counter').textContent = `ステップ ${currentStep}/5`;
+
+            const step = steps[currentStep - 1];
+            document.getElementById('step-counter').textContent = `ステップ ${currentStep}/${totalSteps}`;
             document.getElementById('question').textContent = step.question;
             
             const optionsContainer = document.getElementById('options');
             optionsContainer.innerHTML = '';
 
             if (step.type === 'checkbox') {
-                step.options.forEach(option => {
+                const options = step.getOptions ? step.getOptions() : step.options;
+                options.forEach(option => {
                     if (option.condition && !option.condition()) return;
                     
                     const div = document.createElement('div');
@@ -177,22 +251,25 @@
 
             document.getElementById('back-btn').classList.toggle('hidden', currentStep === 1);
             
-            // 最終ステップでは「計算結果を表示」ボタンに変更
             const nextBtn = document.getElementById('next-btn');
-            if (currentStep === 5) {
+            if (currentStep === totalSteps) {
                 nextBtn.textContent = '計算結果を表示';
             } else {
                 nextBtn.textContent = '次へ';
             }
+
+            updateStepTrail();
         }
 
         function selectOption(option) {
+            const steps = getDynamicSteps();
             const step = steps[currentStep - 1];
             selections[step.key] = option;
-            renderStep();
+            updateStepTrail();
         }
 
         function goNext() {
+            const steps = getDynamicSteps();
             const step = steps[currentStep - 1];
             
             if (step.type === 'checkbox') {
@@ -202,11 +279,7 @@
                     .map(cb => cb.value);
             }
 
-            if (currentStep === 5) {
-                showResult();
-            } else if (currentStep === 4 && !shouldShowPolish()) {
-                // 磨きオプションがない場合は結果表示へ
-                selections.polish = [];
+            if (currentStep === totalSteps) {
                 showResult();
             } else if (selections[step.key] !== undefined) {
                 currentStep++;
@@ -243,20 +316,29 @@
 
             // 特殊仕様の加算
             if (selections.special && selections.special.length > 0) {
-                steps[3].options.forEach(option => {
-                    if (selections.special.includes(option.value)) {
-                        additionalPrice += option.price;
-                        additionalItems.push(option.label);
-                    }
-                });
+                if (selections.special.includes('seethrough')) {
+                    additionalPrice += 2200;
+                    additionalItems.push('シースルーバック（+2,200円）');
+                }
+                if (selections.special.includes('coaxial')) {
+                    additionalPrice += 11000;
+                    additionalItems.push('OMEGA コーアクシャル（+11,000円）');
+                }
             }
 
             // 磨きオプションの加算
             if (selections.polish && selections.polish.length > 0) {
-                steps[4].options.forEach(option => {
-                    if (selections.polish.includes(option.value)) {
-                        polishPrice += option.price;
-                        additionalItems.push(option.label);
+                const isRolex = category === "ROLEX";
+                const price3 = isRolex ? 17600 : 16500;
+                const price5 = isRolex ? 19800 : 18700;
+                
+                selections.polish.forEach(polish => {
+                    if (polish.includes('3')) {
+                        polishPrice += price3;
+                        additionalItems.push(`磨き3連（${price3.toLocaleString()}円）`);
+                    } else if (polish.includes('5')) {
+                        polishPrice += price5;
+                        additionalItems.push(`磨き5連（${price5.toLocaleString()}円）`);
                     }
                 });
             }
@@ -265,10 +347,10 @@
 
             // 保証期間の判定
             let warranty = "1年";
-            if (category === "国産時計" && (brand === "SEIKO（GS・CREDOR）")) {
-                warranty = "2年";
-            } else if (category === "舶来時計" || category === "OMEGA・TAG HEUER" || category === "ROLEX") {
-                if (mechanismKey.includes("mechanical")) {
+            if (mechanismKey && mechanismKey.includes("mechanical")) {
+                if (category === "国産時計" && (brand.includes("GS") || brand.includes("CREDOR") || brand.includes("EXCEED"))) {
+                    warranty = "2年";
+                } else if (category !== "国産時計") {
                     warranty = "2年";
                 }
             }
@@ -299,11 +381,11 @@
             `;
 
             // 磨きセット価格表示
-            if (shouldShowPolish()) {
+            if (shouldShowPolish() && polishPrice > 0) {
                 resultHTML += `
                     <div class="polish-note">
-                        <p>参考：磨きセット価格（修理料金＋磨き）＝¥${totalPrice.toLocaleString()}〜</p>
-                        ${polishPrice > 0 ? '<p>※磨きの対応可否や詳細は修理業者判断の場合があります。</p>' : ''}
+                        <p>参考：磨きセット価格 = ¥${totalPrice.toLocaleString()}〜</p>
+                        <p>※磨きの対応可否や詳細は修理業者判断の場合があります。</p>
                     </div>
                 `;
             }
@@ -312,7 +394,9 @@
                     <p><strong>保証期間：</strong>${warranty}</p>
                     
                     <div class="note">
-                        ${category === "ROLEX" ? "※ROLEX磨きは別料金（要相談）" : ""}
+                        ※料金は税込表記、開始価格です<br>
+                        ※実際の修理内容により金額は変動します<br>
+                        ${category === "ROLEX" ? "※ROLEX修理は磨き抜き価格となります" : ""}
                     </div>
                 </div>
             `;
